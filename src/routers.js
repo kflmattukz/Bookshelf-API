@@ -9,7 +9,7 @@ router.post('/books', addBook);
 router.put('/books', updateBook);
 router.delete('/books', destroyBook);
 
-router.get('/book/:id', getBookById);
+router.get('/books/:bookid', getBookById);
 router.get('/books/:name' , getBookByName);
 router.get('/books/:status', getBookByStatus);
 
