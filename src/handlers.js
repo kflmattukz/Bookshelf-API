@@ -20,8 +20,6 @@ const addBook = (req,res) => {
     website
   } = req.body;
 
-  console.log(req.body);
-
   const isbn = nanoid(16);
   const insertedAt = new Date().toISOString();
   const updatedAt = insertedAt;
@@ -49,14 +47,17 @@ const addBook = (req,res) => {
     updatedAt
   }
 
-  console.log(books);
   books.push(newBook);
-
-  const result = fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(books,null,4));
-  if (!result){
-    return res.status(401).json({ msg:"something went wrong, please try again later..." });
+  let collBook = {
+    books: [...books]
   }
-  return res.status(201).json({ success: true , msg: "add book success" , book: newBook });
+
+  try {
+    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(collBook,null,4));
+    return res.status(201).json({ success: true , msg: "add book success" , book: newBook });
+  } catch (error) {
+    return res.status(401).json({ msg:"something went wrong, please try again later..." , error});
+  }
 }
 
 const updateBook = (req,res) => {
@@ -71,25 +72,33 @@ const updateBook = (req,res) => {
     description,
     website
   } = req.params;
-
-  const book = books.filter(id === bookId);
-  
 }
 
 const destroyBook = (req,res) => {
-  const { bookId } = req.params;
-  
+  const { bookid } = req.params;
+  const leftBooks = books.filter(book => {return  book.isbn !== bookid})
+
+  let collBook = {
+    books: [...leftBooks]
+  }
+
+  try {
+    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(collBook,null,4));
+    return res.status(201).json({ success: true , msg: "remove book success"});
+  } catch (error) {
+    return res.status(401).json({ msg:"something went wrong, please try again later..." , error});
+  }
+
 };
 
 const getBookById = (req,res) => {
   const { bookid } = req.params;
-  books.map(book => { 
-    if (book.isbn === bookid) {
-      return res.status(201).json(book);
-     }
-    return res.status(401).json({ msg_err : `Book with id ${ bookid } not found` });
-  });
-  
+  const result = books.filter(book => { return book.isbn === bookid });
+  if (result.length === 0) {
+    console.log('error');
+    return res.status(401).json({found: false , msg_err: `Book with id: ${bookid} not found`});
+  }
+  res.status(200).json({found: true, data: result});
 };
 
 const getBookByName = (req,res) => {
