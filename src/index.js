@@ -6,7 +6,7 @@ const routers = require('./routers');
 // Using router
 
 app.use(express.json());
-app.use(routers);
+app.use("/api/v1/",routers);
 
 // Start the App
 app.listen(PORT , () =>{

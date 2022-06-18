@@ -61,17 +61,25 @@ const addBook = (req,res) => {
 }
 
 const updateBook = (req,res) => {
-  const { 
-    isbn,
-    title,
-    subtitle,
-    author,
-    published,
-    publisher,
-    pages,
-    description,
-    website
-  } = req.params;
+  const {bookid} = req.params
+  const newDataBook = req.body;
+  
+  let editBook = books.filter( book => book.isbn === bookid);
+  let tempBooks = books.filter( book => book.isbn !== bookid);
+  
+  editBook = newDataBook;
+  tempBooks.push(editBook);
+  collBook = {
+    books: [...tempBooks]
+  }
+
+  try {
+    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(collBook,null,4));
+    res.status(200).json({ success: true, msg: "Update book success" , data: editBook });
+  } catch (error) {
+    res.status(401).json({success: false , msg: "Something went wrong, please try again later..."});
+  }
+
 }
 
 const destroyBook = (req,res) => {
@@ -101,30 +109,10 @@ const getBookById = (req,res) => {
   res.status(200).json({found: true, data: result});
 };
 
-const getBookByName = (req,res) => {
-  const { name } = req.params;
-  const result = books.filter(name === name);
-  
-  if (!result) return res.status(401).json({ msg_err: `Book with ${ name } not found`});
-  
-  return result;
-};
-
-const getBookByStatus = (req,res) => {
-  const { status } = req.params;
-  const result = books.filter(status === status);
-
-  if (!result) return res.status(401).json({ msg_err: `Book with ${ status } not found`});
-  
-  return status;
-};
-
 module.exports = { 
   addBook, 
   getAllBook,
   updateBook,
   destroyBook,
-  getBookById,
-  getBookByName,
-  getBookByStatus
+  getBookById, 
 };
