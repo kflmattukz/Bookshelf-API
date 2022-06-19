@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addBook , getAllBook , updateBook , destroyBook , getBookById , getBookByName , getBookByStatus } = require('./handlers');
+const { addBook , getAllBook , updateBook , destroyBook , getBookById} = require('./handlers');
 
 router.get('/' , (req,res) => { res.send('Welcome to Bookshelf API'); });
 

@@ -48,12 +48,9 @@ const addBook = (req,res) => {
   }
 
   books.push(newBook);
-  let collBook = {
-    books: [...books]
-  }
-
+  
   try {
-    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(collBook,null,4));
+    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify({ books: [...books] },null,4));
     return res.status(201).json({ success: true , msg: "add book success" , book: newBook });
   } catch (error) {
     return res.status(401).json({ msg:"something went wrong, please try again later..." , error});
@@ -65,16 +62,13 @@ const updateBook = (req,res) => {
   const newDataBook = req.body;
   
   let editBook = books.filter( book => book.isbn === bookid);
-  let tempBooks = books.filter( book => book.isbn !== bookid);
+  let collBooks = books.filter( book => book.isbn !== bookid);
   
   editBook = newDataBook;
-  tempBooks.push(editBook);
-  collBook = {
-    books: [...tempBooks]
-  }
-
+  collBooks.push(editBook);
+  
   try {
-    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(collBook,null,4));
+    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify({ books: [...collBooks] },null,4));
     res.status(200).json({ success: true, msg: "Update book success" , data: editBook });
   } catch (error) {
     res.status(401).json({success: false , msg: "Something went wrong, please try again later..."});
@@ -84,24 +78,24 @@ const updateBook = (req,res) => {
 
 const destroyBook = (req,res) => {
   const { bookid } = req.params;
-  const leftBooks = books.filter(book => {return  book.isbn !== bookid})
-
-  let collBook = {
-    books: [...leftBooks]
+  const findBook = books.filter(book => book.isbn === bookid);
+  
+  if (findBook.length > 0) {
+    const leftBooks = books.filter(book => book.isbn !== bookid);
+    try {
+      fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify({ books: [...leftBooks] },null,4));
+      return res.status(201).json({ success: true , msg: "remove book success"});
+    } catch (error) {
+      return res.status(401).json({ msg:"something went wrong, please try again later..." , error});
+    }
   }
-
-  try {
-    fs.writeFileSync(path.join(__dirname,"/books.json"), JSON.stringify(collBook,null,4));
-    return res.status(201).json({ success: true , msg: "remove book success"});
-  } catch (error) {
-    return res.status(401).json({ msg:"something went wrong, please try again later..." , error});
-  }
-
+  res.status(401).json({success: false, msg: `Book with id ${ bookid } not found`});
 };
 
 const getBookById = (req,res) => {
   const { bookid } = req.params;
-  const result = books.filter(book => { return book.isbn === bookid });
+  const result = books.filter(book => book.isbn === bookid);
+  
   if (result.length === 0) {
     console.log('error');
     return res.status(401).json({found: false , msg_err: `Book with id: ${bookid} not found`});
