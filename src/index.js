@@ -3,8 +3,6 @@ const app = express();
 const PORT = 3000 || process.env.PORT;
 const routers = require('./routers');
 
-// Using router
-
 app.use(express.json());
 app.use("/api/v1/",routers);
 
